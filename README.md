@@ -25,14 +25,14 @@ __警告:__ _ASCII Art Installer 僅供 Unix/-Like環境使用._
 ### 下載整個專案
 
 ```shell
-git clone https://github.com/m85091081/asciiartcollection.git
+git clone https://github.com/VagrantPi/asciiartcollection.git
 ```
 
 ### 最後這個是安裝用的 script 
 
 使用 curl 進行 loader.sh 抓取。
 ```shell
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/m85091081/asciiartcollection/shell-script/scripts/loader.sh )"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/VagrantPi/asciiartcollection/refs/heads/master/scripts/loader.sh )"
 ```
 
 

@@ -1,8 +1,11 @@
 #!/bin/sh
 
-JSON_SRC="https://m85091081.github.io/asciiartcollection/json/list.json"
-THEME_SRC="https://m85091081.github.io/asciiartcollection/media/"
-INSTALLER_SRC="https://raw.githubusercontent.com/m85091081/asciiartcollection/shell-script/scripts/ASCIIArtInstaller.sh"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
+JSON_SRC="$PROJECT_DIR/json/list.json"
+THEME_SRC="$PROJECT_DIR/media/"
+INSTALLER_SRC="$PROJECT_DIR/scripts/ASCIIArtInstaller.sh"
 
 WORKING_DIR="$HOME/.asciiarting"
 THEME_LIST="$WORKING_DIR/list.txt"
@@ -17,7 +20,7 @@ test -d $WORKING_DIR || mkdir $WORKING_DIR
 test -d $THEME_FOLD || mkdir $THEME_FOLD
 
 ## 取得清單
-list=`curl -fsSL $JSON_SRC | sed "s/,/\n/g" | sed "s/.*\[\"//g" | sed "s/\"\].*//g"`
+list=$(cat "$JSON_SRC" | tr ',' '\n' | sed -n 's/.*\["\([^"]*\)"\].*/\1/p')
 
 count=0
 
@@ -31,8 +34,12 @@ do
 	echo $theme	>> "${THEME_LIST}.tmp"
 	#sed "1 i$theme" -i "$THEME_LIST"
 done
-tac ${THEME_LIST}.tmp > $THEME_LIST
-rm ${THEME_LIST}.tmp
+if command -v tac > /dev/null 2>&1; then
+	tac "${THEME_LIST}.tmp" > "$THEME_LIST"
+else
+	tail -r "${THEME_LIST}.tmp" > "$THEME_LIST"
+fi
+rm "${THEME_LIST}.tmp"
 
 ## 詢問使用者安裝哪個主題
 input_theme=false
@@ -49,7 +56,7 @@ while [ "$input_theme" == "false" ];do
 		## 尋找主題名稱
 		if theme=`showFileSpLine "$THEME_LIST" "$theme_num"`;then
 			## 嘗試下載
-			if curl -fsSL "${THEME_SRC}/${theme}.txt" -o $THEME_FOLD/${theme}.txt ;then
+			if cp "${THEME_SRC}${theme}.txt" $THEME_FOLD/${theme}.txt ;then
 				clear
 				cat $THEME_FOLD/${theme}.txt
 				echo "================================================"
@@ -58,7 +65,7 @@ while [ "$input_theme" == "false" ];do
 					input_theme="${theme}.txt"
 				fi
 			else
-				echo "ASCII ART下載失敗，伺服器上找不到這張圖"
+				echo "ASCII ART 複製失敗，專案中找不到這張圖"
 			fi
 		else
 			echo "請輸入1 ~ $count 範圍內的數字"
@@ -69,8 +76,8 @@ while [ "$input_theme" == "false" ];do
 done
 
 echo "你要安裝的ASCII ART題已經下載至$THEME_FOLD/${input_theme}"
-echo "下載安裝程式..."
-curl -fsSL $INSTALLER_SRC -o "$WORKING_DIR/ASCIIArtInstaller.sh"
+echo "複製安裝程式..."
+cp $INSTALLER_SRC "$WORKING_DIR/ASCIIArtInstaller.sh"
 chmod 755 "$WORKING_DIR/ASCIIArtInstaller.sh"
 
 ## 詢問使用者安裝方式
